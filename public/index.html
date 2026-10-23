@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CareStock | Pharmacy Management</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-icon">✚</span><div><strong>CareStock</strong><small>PHARMACY MANAGER</small></div></div>
+    <p class="nav-label">WORKSPACE</p>
+    <button class="nav active" data-view="dashboard">▦ <span>Dashboard</span></button>
+    <button class="nav" data-view="inventory">▤ <span>Medicine Inventory</span></button>
+    <button class="nav" data-view="sales">▣ <span>Sales & Billing</span></button>
+    <button class="nav" data-view="reports">▥ <span>MongoDB Reports</span></button>
+    <div class="sidebar-note"><span class="status-dot"></span> Database-backed demo<br><small>Use sample data for testing</small></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><span class="eyebrow">PHARMACY OPERATIONS</span><h1 id="page-title">Dashboard</h1></div><div class="top-actions"><span class="db-status" id="db-status">Checking database…</span><span class="avatar">P</span></div></header>
+    <div id="notice" class="notice hidden"></div>
+    <section id="dashboard-view" class="view">
+      <div class="welcome"><div><p class="eyebrow">OVERVIEW</p><h2>Your pharmacy at a glance</h2><p>Track inventory, expiry dates, and today's sales in one place.</p></div><button class="primary" id="quick-add">＋ Add medicine</button></div>
+      <div class="stats">
+        <article class="stat"><span class="stat-icon purple">▤</span><p>Total medicines</p><h3 id="stat-medicines">—</h3><small>Unique inventory records</small></article>
+        <article class="stat"><span class="stat-icon orange">⌁</span><p>Low stock</p><h3 id="stat-low">—</h3><small>At or below reorder level</small></article>
+        <article class="stat"><span class="stat-icon red">◷</span><p>Expiring soon</p><h3 id="stat-expiring">—</h3><small>Within the next 30 days</small></article>
+        <article class="stat"><span class="stat-icon green">₹</span><p>Today's sales</p><h3 id="stat-sales">—</h3><small id="stat-bills">0 bills today</small></article>
+      </div>
+      <div class="panel-grid"><article class="panel"><div class="panel-head"><div><h3>Inventory alerts</h3><p>Items that need your attention</p></div><button class="text-btn" data-go="inventory">View inventory →</button></div><div id="alerts" class="alert-list"><p class="muted">Loading alerts…</p></div></article>
+      <article class="panel"><div class="panel-head"><div><h3>Inventory snapshot</h3><p>Current stock valuation</p></div></div><div class="stock-value" id="stock-value">₹—</div><p class="muted">Estimated purchase value</p><div class="mini-row"><span>Units in stock</span><strong id="units-stock">—</strong></div><div class="mini-row"><span>Expired items</span><strong id="expired-count">—</strong></div></article></div>
+    </section>
+    <section id="inventory-view" class="view hidden">
+      <div class="section-toolbar"><div><h2>Medicine inventory</h2><p class="muted">Manage medicines and monitor stock levels.</p></div><button class="primary" id="add-medicine">＋ Add medicine</button></div>
+      <div class="filters"><input id="medicine-search" placeholder="Search medicine, generic name, batch…"><select id="stock-filter"><option value="">All stock</option><option value="low">Low stock</option><option value="expired">Expired</option></select><button class="secondary" id="refresh-medicines">Refresh</button></div>
+      <div class="table-wrap"><table><thead><tr><th>MEDICINE</th><th>BATCH</th><th>CATEGORY</th><th>PRICE</th><th>QUANTITY</th><th>EXPIRY</th><th>ACTIONS</th></tr></thead><tbody id="medicine-rows"><tr><td colspan="7">Loading…</td></tr></tbody></table></div>
+    </section>
+    <section id="sales-view" class="view hidden">
+      <div class="section-toolbar"><div><h2>Create a bill</h2><p class="muted">Record a sale and automatically update stock.</p></div></div>
+      <div class="panel sale-panel"><form id="sale-form"><label>Medicine<select id="sale-medicine" required><option value="">Select medicine…</option></select></label><label>Quantity<input id="sale-quantity" type="number" min="1" step="1" value="1" required></label><button class="secondary" type="button" id="add-sale-item">Add to bill</button><div class="sale-items" id="sale-items"><p class="muted">No items added yet.</p></div><div class="sale-bottom"><label>Customer name<input id="customer-name" placeholder="Walk-in customer"></label><label>Payment<select id="payment-method"><option>Cash</option><option>UPI</option><option>Card</option></select></label><label>Discount (₹)<input id="discount" type="number" min="0" step="0.01" value="0"></label></div><div class="bill-total"><span>Subtotal</span><strong id="bill-subtotal">₹0.00</strong></div><div class="bill-total grand"><span>Total payable</span><strong id="bill-total">₹0.00</strong></div><button class="primary" type="submit">Complete sale</button></form></div>
+      <div class="panel"><div class="panel-head"><div><h3>Recent sales</h3><p>Latest bills recorded in MongoDB</p></div><button class="secondary" id="refresh-sales">Refresh</button></div><div class="table-wrap"><table><thead><tr><th>BILL NUMBER</th><th>DATE</th><th>ITEMS</th><th>PAYMENT</th><th>TOTAL</th></tr></thead><tbody id="sales-rows"><tr><td colspan="5">Loading…</td></tr></tbody></table></div></div>
+    </section>
+    <section id="reports-view" class="view hidden">
+      <div class="section-toolbar"><div><h2>MongoDB reports</h2><p class="muted">Live reports powered by aggregation pipelines.</p></div><button class="secondary" id="refresh-reports">Run aggregation</button></div>
+      <div class="panel"><div class="panel-head"><div><h3>Stock by category</h3><p>$group, $sum, $multiply and $sort</p></div></div><div class="table-wrap"><table><thead><tr><th>CATEGORY</th><th>MEDICINE RECORDS</th><th>UNITS</th><th>STOCK VALUE</th></tr></thead><tbody id="category-rows"></tbody></table></div></div>
+      <div class="panel"><div class="panel-head"><div><h3>Top-selling medicines</h3><p>$unwind, $group, $sort and $limit</p></div></div><div class="table-wrap"><table><thead><tr><th>MEDICINE</th><th>UNITS SOLD</th><th>REVENUE</th></tr></thead><tbody id="top-rows"></tbody></table></div></div>
+      <div class="panel mongo-note"><h3>MongoDB features demonstrated</h3><div class="feature-chips"><span>CRUD</span><span>Schema validation</span><span>Indexes</span><span>Regex search</span><span>Aggregation pipeline</span><span>Embedded sale items</span><span>Population / references</span><span>Atomic stock decrement</span></div></div>
+    </section>
+    <footer>CareStock demo · Built with Express and MongoDB · Not for real dispensing or clinical decisions</footer>
+  </main>
+
+  <dialog id="medicine-dialog">
+    <form id="medicine-form" method="dialog">
+      <div class="dialog-head"><div><p class="eyebrow">INVENTORY</p><h2 id="medicine-dialog-title">Add medicine</h2></div><button type="button" class="close-btn" id="close-dialog">×</button></div>
+      <input type="hidden" id="medicine-id">
+      <div class="form-grid">
+        <label>Medicine name *<input id="m-name" required></label><label>Generic name<input id="m-generic"></label>
+        <label>Batch number *<input id="m-batch" required></label><label>Category *<input id="m-category" required placeholder="e.g. Pain Relief"></label>
+        <label>Manufacturer<input id="m-manufacturer"></label><label>Expiry date *<input id="m-expiry" type="date" required></label>
+        <label>Purchase price (₹) *<input id="m-purchase" type="number" min="0" step="0.01" required></label><label>Selling price (₹) *<input id="m-selling" type="number" min="0" step="0.01" required></label>
+        <label>Quantity *<input id="m-quantity" type="number" min="0" step="1" required></label><label>Reorder level<input id="m-reorder" type="number" min="0" step="1" value="10"></label>
+        <label class="checkbox-label"><input id="m-prescription" type="checkbox"> Prescription required</label>
+      </div>
+      <div class="dialog-actions"><button type="button" class="secondary" id="cancel-dialog">Cancel</button><button class="primary" type="submit">Save medicine</button></div>
+    </form>
+  </dialog>
+  <script src="/app.js"></script>
+</body>
+</html>
